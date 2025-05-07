@@ -1,124 +1,184 @@
-import sys
 from antlr4 import *
-from antlr4.tree.Tree import ParseTreeVisitor
+from generated.AraraParser import AraraParser
+from generated.AraraVisitor import AraraVisitor
+from src.error_handler import RuntimeErrorException
 
-from generated.AraraLexer import *
-from generated.AraraParser import *
-
-class Interpreter(ParseTreeVisitor):
+class Interpreter(AraraVisitor):
     def __init__(self):
-        self.memory = {}
-    
+        self.memory = {}  # Armazena as variáveis e seus valores
+        self.functions = {}  # Para futura implementação de funções
+        self.logger = logging.getLogger('Interpreter')
+
     def visitPrograma(self, ctx: AraraParser.ProgramaContext):
-        for comando in ctx.comando():
-            self.visit(comando)
-        return None
+        self.logger.info("Iniciando interpretação do programa")
+        try:
+            for cmd in ctx.comando():
+                self.visit(cmd)
+        except RuntimeErrorException as e:
+            self.logger.error(f"Erro em tempo de execução: {e}")
+            raise
+
+    def visitComando(self, ctx: AraraParser.ComandoContext):
+        if ctx.getChildCount() == 0:
+            return
+        
+        self.logger.debug(f"Visitando comando: {ctx.getText()}")
+        
+        if ctx.leia():
+            self.visitLeia(ctx.leia())
+        elif ctx.escreva():
+            self.visitEscreva(ctx.escreva())
+        elif ctx.atribuicao():
+            self.visitAtribuicao(ctx.atribuicao())
+        elif ctx.condicional():
+            self.visitCondicional(ctx.condicional())
+        elif ctx.repeticao():
+            self.visitRepeticao(ctx.repeticao())
+
+    def visitLeia(self, ctx: AraraParser.LeiaContext):
+        var_name = ctx.ID().getText()
+        try:
+            value = input("> ")  # Lê entrada do usuário
+            try:
+                # Tenta converter para inteiro se possível
+                self.memory[var_name] = int(value)
+            except ValueError:
+                # Se não for número, armazena como string (sem as aspas)
+                self.memory[var_name] = value.strip('"')
+            self.logger.info(f"Leitura: {var_name} = {self.memory[var_name]}")
+        except Exception as e:
+            raise RuntimeErrorException(f"Erro na leitura da variável {var_name}: {str(e)}")
+
+    def visitEscreva(self, ctx: AraraParser.EscrevaContext):
+        try:
+            value = self.visitExpressao(ctx.expressao())
+            print(value)
+            self.logger.info(f"Escrita: {value}")
+        except Exception as e:
+            raise RuntimeErrorException(f"Erro ao escrever: {str(e)}")
 
     def visitAtribuicao(self, ctx: AraraParser.AtribuicaoContext):
         var_name = ctx.ID().getText()
-        value = self.visit(ctx.expressao())
-        self.memory[var_name] = value
-        return None
-
-    def visitLeia(self, ctx: AraraParser.ComandoContext):
-        var_name = ctx.ID().getText()
-        user_input = input(f"Entrada para {var_name}: ")
-        if user_input.isdigit():
-            self.memory[var_name] = int(user_input)
-        else:
-            self.memory[var_name] = user_input
-        return None
-
-    def visitEscreva(self, ctx: AraraParser.ComandoContext):
-        value = self.visit(ctx.expressao())
-        print(value)
-        return None
+        try:
+            value = self.visitExpressao(ctx.expressao())
+            self.memory[var_name] = value
+            self.logger.info(f"Atribuição: {var_name} = {value}")
+        except Exception as e:
+            raise RuntimeErrorException(f"Erro na atribuição de {var_name}: {str(e)}")
 
     def visitCondicional(self, ctx: AraraParser.CondicionalContext):
-        condition = self.visit(ctx.expressao())
-        if condition:
-            self.visit(ctx.bloco(0))
-        elif ctx.cond_opc() is not None:
-            self.visit(ctx.cond_opc())
-        return None
-
-    def visitCond_opc(self, ctx: AraraParser.Cond_opcContext):
-        if ctx.bloco():
-            self.visit(ctx.bloco())
-        return None
+        try:
+            condition = self.visitExpressao(ctx.expressao())
+            self.logger.debug(f"Condicional: condição = {condition}")
+            
+            if condition:
+                self.visitBloco(ctx.bloco(0))
+            elif ctx.cond_opc().senao():
+                self.visitBloco(ctx.bloco(1))
+        except Exception as e:
+            raise RuntimeErrorException(f"Erro na condicional: {str(e)}")
 
     def visitRepeticao(self, ctx: AraraParser.RepeticaoContext):
-        while self.visit(ctx.expressao()):
-            self.visit(ctx.bloco())
-        return None
+        try:
+            while self.visitExpressao(ctx.expressao()):
+                self.logger.debug("Executando iteração do loop")
+                self.visitBloco(ctx.bloco())
+        except Exception as e:
+            raise RuntimeErrorException(f"Erro no loop: {str(e)}")
+
+    def visitBloco(self, ctx: AraraParser.BlocoContext):
+        for cmd in ctx.comando():
+            self.visit(cmd)
 
     def visitExpressao(self, ctx: AraraParser.ExpressaoContext):
-        return self.visit(ctx.logica())
+        return self.visitLogica(ctx.logica())
 
     def visitLogica(self, ctx: AraraParser.LogicaContext):
-        left = self.visit(ctx.comparacao())
-        if ctx.logica_suf():
+        left = self.visitComparacao(ctx.comparacao())
+        if ctx.logica_suf().OPLOG():
             op = ctx.logica_suf().OPLOG().getText()
-            right = self.visit(ctx.logica_suf().comparacao())
-            if op == "&&":
+            right = self.visitLogica_suf(ctx.logica_suf())
+            if op == '&&':
                 return left and right
-            elif op == "||":
+            elif op == '||':
                 return left or right
         return left
 
+    def visitLogica_suf(self, ctx: AraraParser.Logica_sufContext):
+        if ctx.getChildCount() == 0:
+            return None
+        return self.visitComparacao(ctx.comparacao())
+
     def visitComparacao(self, ctx: AraraParser.ComparacaoContext):
-        left = self.visit(ctx.soma())
-        if ctx.comparacao_suf():
+        left = self.visitSoma(ctx.soma())
+        if ctx.comparacao_suf().OPCOMP():
             op = ctx.comparacao_suf().OPCOMP().getText()
-            right = self.visit(ctx.comparacao_suf().soma())
-            if op == "==":
+            right = self.visitSoma(ctx.comparacao_suf().soma())
+            if op == '==':
                 return left == right
-            elif op == "!=":
+            elif op == '!=':
                 return left != right
-            elif op == "<":
+            elif op == '<':
                 return left < right
-            elif op == "<=":
+            elif op == '<=':
                 return left <= right
-            elif op == ">":
+            elif op == '>':
                 return left > right
-            elif op == ">=":
+            elif op == '>=':
                 return left >= right
         return left
 
     def visitSoma(self, ctx: AraraParser.SomaContext):
-        result = self.visit(ctx.termo())
-        if ctx.soma_suf():
+        left = self.visitTermo(ctx.termo())
+        if ctx.soma_suf().OPSUM():
             op = ctx.soma_suf().OPSUM().getText()
-            next_term = self.visit(ctx.soma_suf().termo())
-            if op == "+":
-                return result + next_term
-            elif op == "-":
-                return result - next_term
-        return result
+            right = self.visitSoma_suf(ctx.soma_suf())
+            if op == '+':
+                # Concatenação de strings
+                if isinstance(left, str) or isinstance(right, str):
+                    return str(left) + str(right)
+                return left + right
+            elif op == '-':
+                return left - right
+        return left
+
+    def visitSoma_suf(self, ctx: AraraParser.Soma_sufContext):
+        if ctx.getChildCount() == 0:
+            return None
+        return self.visitTermo(ctx.termo())
 
     def visitTermo(self, ctx: AraraParser.TermoContext):
-        result = self.visit(ctx.fator())
-        if ctx.termo_suf():
+        left = self.visitFator(ctx.fator())
+        if ctx.termo_suf().OPMULT():
             op = ctx.termo_suf().OPMULT().getText()
-            next_factor = self.visit(ctx.termo_suf().fator())
-            if op == "*":
-                return result * next_factor
-            elif op == "/":
-                return result // next_factor
-        return result
+            right = self.visitTermo_suf(ctx.termo_suf())
+            if op == '*':
+                return left * right
+            elif op == '/':
+                if right == 0:
+                    raise RuntimeErrorException("Divisão por zero")
+                return left / right
+        return left
+
+    def visitTermo_suf(self, ctx: AraraParser.Termo_sufContext):
+        if ctx.getChildCount() == 0:
+            return None
+        return self.visitFator(ctx.fator())
 
     def visitFator(self, ctx: AraraParser.FatorContext):
         if ctx.INT():
             return int(ctx.INT().getText())
         elif ctx.STRING():
-            return ctx.STRING().getText().strip('"')
+            return ctx.STRING().getText()[1:-1]  # Remove as aspas
         elif ctx.ID():
             var_name = ctx.ID().getText()
-            if var_name not in self.memory:
-                raise RuntimeError(f"Variable '{var_name}' is not initialized.")
-            return self.memory[var_name]
+            if var_name in self.memory:
+                return self.memory[var_name]
+            else:
+                raise RuntimeErrorException(f"Variável '{var_name}' não definida")
         elif ctx.expressao():
             return self.visit(ctx.expressao())
-        elif ctx.getChild(0).getText() == '!':
-            return not self.visit(ctx.fator())
-        return None
+        elif ctx.getChildCount() == 2 and ctx.getChild(0).getText() == '!':  # Operador de negação
+            return not self.visitFator(ctx.fator(0))
+        else:
+            raise RuntimeErrorException("Expressão inválida")
