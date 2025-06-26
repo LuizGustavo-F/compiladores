@@ -1,5 +1,0 @@
-WARNING: ERRO SEMÂNTICO [Linha 2, Coluna 0]: Variável 'x' já declarada.
-WARNING: ERRO SEMÂNTICO [Linha 3, Coluna 8]: Divisão por zero.
-WARNING: ERRO SEMÂNTICO [Linha 4, Coluna 0]: Variável 'y' usada sem declaração.
-WARNING: ERRO SEMÂNTICO [Linha 5, Coluna 0]: Variável 'z' usada sem declaração.
-WARNING: ERRO SEMÂNTICO [Linha 5, Coluna 11]: Operação '*' inválida com tipo string.

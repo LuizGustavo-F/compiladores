@@ -1,3 +1,7 @@
+inteiro a;
+inteiro b;
+inteiro c;
+
 leia(a);
 leia(b);
 leia(c);

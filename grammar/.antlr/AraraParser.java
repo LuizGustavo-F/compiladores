@@ -1,4 +1,4 @@
-// Generated from c:/Users/8760659/compilador_arara/grammar/Arara.g4 by ANTLR 4.13.1
+// Generated from c:/Users/8760659/Documents/GitHub/compiladores/grammar/Arara.g4 by ANTLR 4.13.1
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
