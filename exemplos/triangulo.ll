@@ -15,78 +15,73 @@ declare i32 @__isoc99_scanf(i8* noundef, ...) # !1
 
 define i32 @main() {
 entry:
-  %a_ptr = alloca i32, align 4
-  %b_ptr = alloca i32, align 4
-  %c_ptr = alloca i32, align 4
-  %temp0 = getelementptr inbounds ([3 x i8], [3 x i8]* @.str.0, i64 0, i64 0)
-  %call_scanf_temp1 = call i32 (i8*, ...) @__isoc99_scanf(i8* %temp0, i32* %a_ptr)
-  %temp2 = getelementptr inbounds ([3 x i8], [3 x i8]* @.str.0, i64 0, i64 0)
-  %call_scanf_temp3 = call i32 (i8*, ...) @__isoc99_scanf(i8* %temp2, i32* %b_ptr)
-  %temp4 = getelementptr inbounds ([3 x i8], [3 x i8]* @.str.0, i64 0, i64 0)
-  %call_scanf_temp5 = call i32 (i8*, ...) @__isoc99_scanf(i8* %temp4, i32* %c_ptr)
-  %temp6 = load i32, i32* %a_ptr, align 4
-  %temp7 = icmp ne i32 %temp6, 0
-  %_t0 = icmp sgt i1 %temp7, 0
-  %temp8 = load i32, i32* %b_ptr, align 4
-  %temp9 = icmp ne i32 %temp8, 0
-  %_t1 = icmp sgt i1 %temp9, 0
-  %_t2 = and i1 %_t0, %_t1
-  %temp10 = load i32, i32* %a_ptr, align 4
-  %temp11 = load i32, i32* %b_ptr, align 4
-  %_t3 = add i32 %temp10, %temp11
-  %temp12 = icmp ne i32 %_t3, 0
-  %temp13 = load i32, i32* %c_ptr, align 4
-  %temp14 = icmp ne i32 %temp13, 0
-  %_t4 = icmp sgt i1 %temp12, %temp14
-  %temp15 = load i32, i32* %a_ptr, align 4
-  %temp16 = load i32, i32* %c_ptr, align 4
-  %_t5 = add i32 %temp15, %temp16
-  %temp17 = icmp ne i32 %_t5, 0
-  %temp18 = load i32, i32* %b_ptr, align 4
-  %temp19 = icmp ne i32 %temp18, 0
-  %_t6 = icmp sgt i1 %temp17, %temp19
-  %_t7 = and i1 %_t4, %_t6
-  %temp20 = load i32, i32* %a_ptr, align 4
-  %temp21 = icmp ne i32 %temp20, 0
-  %temp22 = load i32, i32* %b_ptr, align 4
-  %temp23 = icmp ne i32 %temp22, 0
-  %_t8 = icmp eq i1 %temp21, %temp23
-  %temp24 = load i32, i32* %b_ptr, align 4
-  %temp25 = icmp ne i32 %temp24, 0
-  %temp26 = load i32, i32* %c_ptr, align 4
-  %temp27 = icmp ne i32 %temp26, 0
-  %_t9 = icmp eq i1 %temp25, %temp27
-  %_t10 = and i1 %_t8, %_t9
-  %temp28 = getelementptr inbounds ([32 x i8], [32 x i8]* @.str.1, i64 0, i64 0)
-  %call_printf_temp29 = call i32 (i8*, ...) @printf(i8* %temp28)
-  br label %L5
+    %a_ptr = alloca i32, align 4
+    %b_ptr = alloca i32, align 4
+    %c_ptr = alloca i32, align 4
+    %temp0 = getelementptr inbounds ([3 x i8], [3 x i8]* @.str.0, i32 0, i32 0)
+    %call_scanf_%temp1 = call i32 (i8*, ...) @__isoc99_scanf(i8* %temp0, i32* %a_ptr)
+    %temp2 = getelementptr inbounds ([3 x i8], [3 x i8]* @.str.0, i32 0, i32 0)
+    %call_scanf_%temp3 = call i32 (i8*, ...) @__isoc99_scanf(i8* %temp2, i32* %b_ptr)
+    %temp4 = getelementptr inbounds ([3 x i8], [3 x i8]* @.str.0, i32 0, i32 0)
+    %call_scanf_%temp5 = call i32 (i8*, ...) @__isoc99_scanf(i8* %temp4, i32* %c_ptr)
+    %temp6 = load i32, i32* %a_ptr, align 4
+    %_t0 = icmp sgt i32 %temp6, 0
+    %temp7 = load i32, i32* %b_ptr, align 4
+    %_t1 = icmp sgt i32 %temp7, 0
+    %_t2 = and i1 %_t0, %_t1
+    br i1 %_t2, label %block_temp8, label %L0
+block_temp8:
+    %temp9 = load i32, i32* %a_ptr, align 4
+    %temp10 = load i32, i32* %b_ptr, align 4
+    %_t3 = add i32 %temp9, %temp10
+    %temp11 = load i32, i32* %c_ptr, align 4
+    %_t4 = icmp sgt i32 %_t3, %temp11
+    %temp12 = load i32, i32* %a_ptr, align 4
+    %temp13 = load i32, i32* %c_ptr, align 4
+    %_t5 = add i32 %temp12, %temp13
+    %temp14 = load i32, i32* %b_ptr, align 4
+    %_t6 = icmp sgt i32 %_t5, %temp14
+    %_t7 = and i1 %_t4, %_t6
+    br i1 %_t7, label %block_temp15, label %L2
+block_temp15:
+    %temp16 = load i32, i32* %a_ptr, align 4
+    %temp17 = load i32, i32* %b_ptr, align 4
+    %_t8 = icmp eq i32 %temp16, %temp17
+    %temp18 = load i32, i32* %b_ptr, align 4
+    %temp19 = load i32, i32* %c_ptr, align 4
+    %_t9 = icmp eq i32 %temp18, %temp19
+    %_t10 = and i1 %_t8, %_t9
+    br i1 %_t10, label %block_temp20, label %L4
+block_temp20:
+    %temp21 = getelementptr inbounds ([32 x i8], [32 x i8]* @.str.1, i32 0, i32 0)
+    %call_printf_%temp22 = call i32 (i8*, ...) @printf(i8* %temp21)
+    br label %L5
 L4:
-  %temp31 = load i32, i32* %a_ptr, align 4
-  %temp32 = icmp ne i32 %temp31, 0
-  %temp33 = load i32, i32* %b_ptr, align 4
-  %temp34 = icmp ne i32 %temp33, 0
-  %_t11 = icmp eq i1 %temp32, %temp34
-  %temp35 = load i32, i32* %a_ptr, align 4
-  %temp36 = icmp ne i32 %temp35, 0
-  %temp37 = load i32, i32* %c_ptr, align 4
-  %temp38 = icmp ne i32 %temp37, 0
-  %_t12 = icmp eq i1 %temp36, %temp38
-  %_t13 = or i1 %_t11, %_t12
-  %temp39 = getelementptr inbounds ([31 x i8], [31 x i8]* @.str.2, i64 0, i64 0)
-  %call_printf_temp40 = call i32 (i8*, ...) @printf(i8* %temp39)
-  br label %L7
+    %temp24 = load i32, i32* %a_ptr, align 4
+    %temp25 = load i32, i32* %b_ptr, align 4
+    %_t11 = icmp eq i32 %temp24, %temp25
+    %temp26 = load i32, i32* %a_ptr, align 4
+    %temp27 = load i32, i32* %c_ptr, align 4
+    %_t12 = icmp eq i32 %temp26, %temp27
+    %_t13 = or i1 %_t11, %_t12
+    br i1 %_t13, label %block_temp28, label %L6
+block_temp28:
+    %temp29 = getelementptr inbounds ([31 x i8], [31 x i8]* @.str.2, i32 0, i32 0)
+    %call_printf_%temp30 = call i32 (i8*, ...) @printf(i8* %temp29)
+    br label %L7
 L6:
-  %temp42 = getelementptr inbounds ([29 x i8], [29 x i8]* @.str.3, i64 0, i64 0)
-  %call_printf_temp43 = call i32 (i8*, ...) @printf(i8* %temp42)
+    %temp32 = getelementptr inbounds ([29 x i8], [29 x i8]* @.str.3, i32 0, i32 0)
+    %call_printf_%temp33 = call i32 (i8*, ...) @printf(i8* %temp32)
 L5:
-  br label %L3
+    br label %L3
 L2:
-  %temp45 = getelementptr inbounds ([20 x i8], [20 x i8]* @.str.4, i64 0, i64 0)
-  %call_printf_temp46 = call i32 (i8*, ...) @printf(i8* %temp45)
+    %temp35 = getelementptr inbounds ([20 x i8], [20 x i8]* @.str.4, i32 0, i32 0)
+    %call_printf_%temp36 = call i32 (i8*, ...) @printf(i8* %temp35)
 L3:
-  br label %L1
+    br label %L1
 L0:
-  %temp48 = getelementptr inbounds ([54 x i8], [54 x i8]* @.str.5, i64 0, i64 0)
-  %call_printf_temp49 = call i32 (i8*, ...) @printf(i8* %temp48)
-  ret i32 0
+    %temp38 = getelementptr inbounds ([54 x i8], [54 x i8]* @.str.5, i32 0, i32 0)
+    %call_printf_%temp39 = call i32 (i8*, ...) @printf(i8* %temp38)
+L1:
+    ret i32 0
 }
