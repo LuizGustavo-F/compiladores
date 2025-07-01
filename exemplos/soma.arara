@@ -1,0 +1,10 @@
+inteiro a;
+inteiro b;
+inteiro valor;
+
+escreva("Digite um valor para a:");
+leia(a);
+escreva("Digite um valor para b:");
+leia(b);
+valor <- a + b;
+escreva(valor);

@@ -5,21 +5,30 @@ from src.tac.TACGenerator import TACOperand, TACInstruction
 
 class LLVMGenerator:
     def __init__(self, semantic_table={}): 
-        self.module_header_lines = []
+        self.module_header_lines = [
+            '; ModuleID = "arara_program"',
+            'source_filename = "arara.arara"',
+            'target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"',
+            'target triple = "x86_64-pc-linux-gnu"'
+        ]
         self.global_strings_defs = [] 
-        self.function_declarations = [] 
+        # CORREÇÃO AQUI: Declara scanf sem __isoc99_
+        self.function_declarations = [
+            'declare i32 @printf(i8*, ...)',
+            'declare i32 @scanf(i8*, ...)' # Mudado de __isoc99_scanf para scanf
+        ]
         self.main_function_blocks = [] 
-        
+
         self.var_map = {}  
         self.temp_map = {} 
         self.label_map = {} 
-        
+
         self.llvm_temp_counter = 0 
         self.string_count = 0
-        
+
         self.current_block_instructions = [] 
         self.current_block_name = "entry" 
-        
+
         self.string_literals = {} 
         self.semantic_table = semantic_table 
 
@@ -30,22 +39,15 @@ class LLVMGenerator:
         if self.current_block_instructions: 
             self.main_function_blocks.append(f'{self.current_block_name}:')
             self.main_function_blocks.extend(self.current_block_instructions)
-            
         self.current_block_name = block_name
         self.current_block_instructions = [] 
 
     def _get_llvm_type(self, arara_type):
-        if arara_type == "inteiro":
-            return "i32"
-        elif arara_type == "real":
-            return "float" 
-        elif arara_type == "booleano":
-            return "i1"
-        return "i8*" 
-
-    def _declare_printf_scanf(self):
-        self.function_declarations.append('declare i32 @printf(i8* noundef, ...) # !0')
-        self.function_declarations.append('declare i32 @__isoc99_scanf(i8* noundef, ...) # !1')
+        return {
+            "inteiro": "i32",
+            "real": "float",
+            "booleano": "i1"
+        }.get(arara_type, "i8*")
 
     def _add_string_literal(self, s_content):
         if s_content not in self.string_literals:
@@ -61,16 +63,14 @@ class LLVMGenerator:
             self.string_count += 1
         return self.string_literals[s_content]
 
-    # --- CORREÇÃO AQUI: Adiciona '%' ao nome do registrador ---
     def next_llvm_reg(self):
         self.llvm_temp_counter += 1
-        return f'%temp{self.llvm_temp_counter - 1}' # Adicionado '%'
-    # --- FIM DA CORREÇÃO ---
+        return f'%temp{self.llvm_temp_counter - 1}'
     
     def next_llvm_label_name(self):
-        label_name = f'block_{self.next_llvm_reg().strip("%")}' # Remove '%' para usar como nome de label
-        return label_name
+        return f'block_{self.llvm_temp_counter}' 
 
+    # --- MÉTODO _get_llvm_operand_value ATUALIZADO (getelementptr para strings literais com i64) ---
     def _get_llvm_operand_value(self, tac_operand: 'TACOperand', target_llvm_type=None):
         val = tac_operand.value 
 
@@ -83,8 +83,8 @@ class LLVMGenerator:
                 stripped_val = val.strip('"')
                 name, length = self._add_string_literal(stripped_val)
                 string_ptr_reg = self.next_llvm_reg()
-                self._add_instruction(f'  {string_ptr_reg} = getelementptr inbounds ([{length} x i8], [{length} x i8]* {name}, i64 0, i64 0)')
-                return string_ptr_reg # Retorna o registrador com '%'
+                self._add_instruction(f'  {string_ptr_reg} = getelementptr inbounds i8, [{length} x i8]* {name}, i64 0, i64 0') 
+                return string_ptr_reg
 
         elif tac_operand.type == 'ID': 
             var_name = val 
@@ -97,7 +97,7 @@ class LLVMGenerator:
                     bool_reg = self.next_llvm_reg()
                     self._add_instruction(f'  {bool_reg} = icmp ne i32 {load_reg}, 0') 
                     return bool_reg
-            return load_reg # Retorna o registrador com '%'
+            return load_reg
 
         elif tac_operand.type == 'TEMP': 
             temp_name = val 
@@ -108,40 +108,38 @@ class LLVMGenerator:
                     bool_reg = self.next_llvm_reg()
                     self._add_instruction(f'  {bool_reg} = icmp ne i32 {val_reg}, 0')
                     return bool_reg
-            return val_reg # Retorna o registrador com '%'
+            return val_reg
         
         elif tac_operand.type == 'LABEL': 
             return tac_operand.value 
 
         return "ERROR_OPERAND" 
 
-    def generate_llvm_ir(self, tac_instructions: list['TACInstruction']): 
+    # --- MÉTODO generate (COM TODAS AS CORREÇÕES FINAIS) ---
+    def generate(self, tac_instructions: list['TACInstruction']): 
         self.__init__(self.semantic_table) 
 
-        self.module_header_lines = [
-            '; ModuleID = "arara_program"',
-            'source_filename = "arara.arara"',
-            'target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"',
-            'target triple = "x86_64-pc-linux-gnu"'
-        ]
+        # 1. Cabeçalho do Módulo LLVM (definido no __init__)
+        # 2. Declarações de Funções Externas (definido no __init__)
         
-        self._declare_printf_scanf() 
-
+        # 3. Pré-processamento: Coletar strings e mapear rótulos TAC para nomes de blocos LLVM IR
         for instr in tac_instructions:
             if instr.opcode == "WRITE":
                 if instr.result and instr.result.type == 'LITERAL' and isinstance(instr.result.value, str) and instr.result.value.startswith('"'):
                     string_content_with_newline = instr.result.value.strip('"') + "\n"
                     self._add_string_literal(string_content_with_newline)
+                self._add_string_literal("%d\n") # Formato para imprimir inteiros com newline
             elif instr.opcode == "READ":
-                 self._add_string_literal("%d") 
+                 self._add_string_literal("%d") # Formato para ler inteiros (sem newline)
             
             if instr.opcode == "LABEL": 
-                label_name = instr.result.value 
-                self.label_map[label_name] = label_name 
+                self.label_map[instr.result.value] = instr.result.value 
 
+        # 4. Início da função principal (main)
         self.main_function_blocks.append('define i32 @main() {')
         self._start_new_block("entry") 
         
+        # Alocação de variáveis Arara (somente no bloco de entrada)
         variables_to_allocate = set()
         for instr in tac_instructions:
             if instr.opcode == "DECL" or instr.opcode == "READ":
@@ -157,18 +155,14 @@ class LLVMGenerator:
             self._add_instruction(f'  {ptr_reg} = alloca {llvm_type}, align 4')
             self.var_map[var_name] = (ptr_reg, llvm_type) 
 
-
+        # 5. Processar instruções TAC e preencher os blocos básicos
         for i, instr in enumerate(tac_instructions):
             op = instr.opcode
             result_operand = instr.result
             arg1_operand = instr.arg1
             arg2_operand = instr.arg2
 
-            if op == "LABEL": 
-                label_name = result_operand.value
-                self._start_new_block(self.label_map[label_name]) 
-
-            elif op == "ASSIGN": 
+            if op == "ASSIGN": 
                 dest_operand = result_operand
                 src_operand = arg1_operand
                 
@@ -236,11 +230,9 @@ class LLVMGenerator:
                 var_name = var_operand.value
                 ptr_reg, llvm_type = self.var_map.get(var_name, (None, None))
                 if ptr_reg:
-                    # Referência corrigida: self.string_literals["%d"] (sem \n)
                     format_str_name, format_str_len = self.string_literals["%d"] 
                     fmt_ptr_reg = self.next_llvm_reg()
-                    self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds ([{format_str_len} x i8], [{format_str_len} x i8]* {format_str_name}, i32 0, i32 0)')
-                    self._add_instruction(f'  %call_scanf_{self.next_llvm_reg()} = call i32 (i8*, ...) @__isoc99_scanf(i8* {fmt_ptr_reg}, {llvm_type}* {ptr_reg})')
+                    self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
 
             elif op == "WRITE":
                 val_operand = result_operand 
@@ -249,7 +241,7 @@ class LLVMGenerator:
                     actual_string_with_newline = val_operand.value.strip('"') + "\n"
                     format_str_name, format_str_len = self.string_literals[actual_string_with_newline] 
                     fmt_ptr_reg = self.next_llvm_reg()
-                    self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds ([{format_str_len} x i8], [{format_str_len} x i8]* {format_str_name}, i32 0, i32 0)')
+                    self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
                     self._add_instruction(f'  %call_printf_{self.next_llvm_reg()} = call i32 (i8*, ...) @printf(i8* {fmt_ptr_reg})')
                 else: 
                     operand_llvm_type = "i32" 
@@ -260,35 +252,15 @@ class LLVMGenerator:
 
                     llvm_value = self._get_llvm_operand_value(val_operand, operand_llvm_type)
                     
-                    # Referência corrigida: self.string_literals["%d\n"]
                     format_str_name, format_str_len = self.string_literals["%d\n"] 
                     fmt_ptr_reg = self.next_llvm_reg()
-                    self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds ([{format_str_len} x i8], [{format_str_len} x i8]* {format_str_name}, i32 0, i32 0)')
+                    self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
                     self._add_instruction(f'  %call_printf_{self.next_llvm_reg()} = call i32 (i8*, ...) @printf(i8* {fmt_ptr_reg}, i32 {llvm_value})')
 
-            elif op == "LABEL":
-                label_name = result_operand.value 
-                self._start_new_block(self.label_map[label_name]) 
-
-            elif op == "GOTO":
-                label_name = result_operand.value 
-                self._add_instruction(f'  br label %{label_name}')
-                self._start_new_block(self.next_llvm_label_name()) 
-
-            elif op == "IF_FALSE_GOTO":
-                cond_operand = arg1_operand 
-                false_label_operand = result_operand 
-                
-                llvm_cond_val = self._get_llvm_operand_value(cond_operand, target_llvm_type="i1") 
-                
-                true_label_name = self.next_llvm_label_name() 
-                false_label_name = false_label_operand.value 
-                
-                self._add_instruction(f'  br i1 {llvm_cond_val}, label %{true_label_name}, label %{false_label_name}')
-                self._start_new_block(true_label_name) 
-
-            elif op == "DECL": 
+            elif op == "LABEL" or op == "GOTO" or op == "IF_FALSE_GOTO" or op in ["EQ", "NEQ", "LT", "LE", "GT", "GE", "AND", "OR", "NOT"] :
                 pass
+            elif op == "DECL": 
+                pass 
             
             else:
                 self._add_instruction(f'; Instrução TAC não implementada ou não reconhecida: {op}')

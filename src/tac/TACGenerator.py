@@ -238,7 +238,6 @@ class TACGenerator(ParseTreeVisitor):
             self.tac_instructions.append(TACInstruction('MUL', temp, current_operand, next_operand))
         elif op == '/':
             self.tac_instructions.append(TACInstruction('DIV', temp, current_operand, next_operand))
-        # Continua visitando o sufixo com o novo temporário como operando atual
         return self.visitar_termo_suf(ctx.termo_suf(), temp)
 
     def _handle_arithmetic_suf(self, ctx, initial_operand):

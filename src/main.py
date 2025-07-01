@@ -118,7 +118,7 @@ def analisar_arquivo(caminho, gerar_tac=False, gerar_llvm=False):
             # LINHA CORRIGIDA AQUI: Passa apenas semantico.tabela_simbolos para o construtor
             llvm_generator = LLVMGenerator(semantico.tabela_simbolos) 
             # Chama generate_llvm_ir com as instruções TAC
-            llvm_ir_code = llvm_generator.generate_llvm_ir(tac_generator.tac_instructions) 
+            llvm_ir_code = llvm_generator.generate(tac_generator.tac_instructions)
 
             output_filename = os.path.splitext(os.path.basename(caminho))[0] + ".ll"
             output_filepath = os.path.join(os.path.dirname(caminho), output_filename)
