@@ -70,7 +70,6 @@ class LLVMGenerator:
     def next_llvm_label_name(self):
         return f'block_{self.llvm_temp_counter}' 
 
-    # --- MÉTODO _get_llvm_operand_value ATUALIZADO (getelementptr para strings literais com i64) ---
     def _get_llvm_operand_value(self, tac_operand: 'TACOperand', target_llvm_type=None):
         val = tac_operand.value 
 
@@ -115,7 +114,6 @@ class LLVMGenerator:
 
         return "ERROR_OPERAND" 
 
-    # --- MÉTODO generate (COM TODAS AS CORREÇÕES FINAIS) ---
     def generate(self, tac_instructions: list['TACInstruction']): 
         self.__init__(self.semantic_table) 
 
@@ -154,6 +152,7 @@ class LLVMGenerator:
             ptr_reg = f'%{var_name}_ptr'
             self._add_instruction(f'  {ptr_reg} = alloca {llvm_type}, align 4')
             self.var_map[var_name] = (ptr_reg, llvm_type) 
+
 
         # 5. Processar instruções TAC e preencher os blocos básicos
         for i, instr in enumerate(tac_instructions):
@@ -233,13 +232,15 @@ class LLVMGenerator:
                     format_str_name, format_str_len = self.string_literals["%d"] 
                     fmt_ptr_reg = self.next_llvm_reg()
                     self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
+                    # CORREÇÃO AQUI: call scanf sem %
+                    self._add_instruction(f'  %call_scanf_{self.next_llvm_reg()} = call i32 (i8*, ...) @scanf(i8* {fmt_ptr_reg}, {llvm_type}* {ptr_reg})') # Mudado para scanf
 
             elif op == "WRITE":
                 val_operand = result_operand 
                 
                 if val_operand.type == 'LITERAL' and isinstance(val_operand.value, str) and val_operand.value.startswith('"'):
                     actual_string_with_newline = val_operand.value.strip('"') + "\n"
-                    format_str_name, format_str_len = self.string_literals[actual_string_with_newline] 
+                    format_str_name, format_str_len = self._add_string_literal(actual_string_with_newline) 
                     fmt_ptr_reg = self.next_llvm_reg()
                     self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
                     self._add_instruction(f'  %call_printf_{self.next_llvm_reg()} = call i32 (i8*, ...) @printf(i8* {fmt_ptr_reg})')
