@@ -5,17 +5,17 @@ from src.tac.TACGenerator import TACOperand, TACInstruction
 
 class LLVMGenerator:
     def __init__(self, semantic_table={}): 
+        # --- CORREÇÃO AQUI: target triple mudado para Windows/MSVC ---
         self.module_header_lines = [
             '; ModuleID = "arara_program"',
             'source_filename = "arara.arara"',
             'target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"',
-            'target triple = "x86_64-pc-linux-gnu"'
+            'target triple = "x86_64-pc-windows-msvc"' # Mudado de linux-gnu para windows-msvc
         ]
         self.global_strings_defs = [] 
-        # CORREÇÃO AQUI: Declara scanf sem __isoc99_
         self.function_declarations = [
             'declare i32 @printf(i8*, ...)',
-            'declare i32 @scanf(i8*, ...)' # Mudado de __isoc99_scanf para scanf
+            'declare i32 @scanf(i8*, ...)' 
         ]
         self.main_function_blocks = [] 
 
@@ -66,7 +66,7 @@ class LLVMGenerator:
     def next_llvm_reg(self):
         self.llvm_temp_counter += 1
         return f'%temp{self.llvm_temp_counter - 1}'
-    
+
     def next_llvm_label_name(self):
         return f'block_{self.llvm_temp_counter}' 
 
@@ -82,7 +82,7 @@ class LLVMGenerator:
                 stripped_val = val.strip('"')
                 name, length = self._add_string_literal(stripped_val)
                 string_ptr_reg = self.next_llvm_reg()
-                self._add_instruction(f'  {string_ptr_reg} = getelementptr inbounds i8, [{length} x i8]* {name}, i64 0, i64 0') 
+                self._add_instruction(f'  {string_ptr_reg} = getelementptr inbounds i8, [{length} x i8]* {name}, i64 0, i32 0') 
                 return string_ptr_reg
 
         elif tac_operand.type == 'ID': 
@@ -232,8 +232,8 @@ class LLVMGenerator:
                     format_str_name, format_str_len = self.string_literals["%d"] 
                     fmt_ptr_reg = self.next_llvm_reg()
                     self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
-                    # CORREÇÃO AQUI: call scanf sem %
-                    self._add_instruction(f'  %call_scanf_{self.next_llvm_reg()} = call i32 (i8*, ...) @scanf(i8* {fmt_ptr_reg}, {llvm_type}* {ptr_reg})') # Mudado para scanf
+                    # CORREÇÃO AQUI: chamada a scanf, não a __isoc99_scanf
+                    self._add_instruction(f'  %call_scanf_{self.next_llvm_reg()} = call i32 (i8*, ...) @scanf(i8* {fmt_ptr_reg}, {llvm_type}* {ptr_reg})') 
 
             elif op == "WRITE":
                 val_operand = result_operand 

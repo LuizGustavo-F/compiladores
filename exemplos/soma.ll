@@ -1,7 +1,7 @@
 ; ModuleID = "arara_program"
 source_filename = "arara.arara"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-pc-linux-gnu"
+target triple = "x86_64-pc-windows-msvc"
 
 @.str.0 = private unnamed_addr constant [25 x i8] c"\44\69\67\69\74\65\20\75\6D\20\76\61\6C\6F\72\20\70\61\72\61\20\61\3A\0A\00", align 1
 @.str.1 = private unnamed_addr constant [4 x i8] c"\25\64\0A\00", align 1
