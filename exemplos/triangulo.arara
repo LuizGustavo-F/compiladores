@@ -2,24 +2,27 @@ inteiro a;
 inteiro b;
 inteiro c;
 
+escreva("Entre com um valor para A");
 leia(a);
+escreva("Entre com um valor para B");
 leia(b);
+escreva("Entre com um valor para C");
 leia(c);
 
 se (a > 0 && b > 0 && c > 0) entao
     se (a + b > c && a + c > b && b + c > a) entao
         se (a == b && b == c) entao
-            escreva("Triângulo equilátero válido");
+            escreva("Triangulo equilatero valido");
         senao
             se (a == b || a == c || b == c) entao
-                escreva("Triângulo isósceles válido");
+                escreva("Triangulo isosceles valido");
             senao
-                escreva("Triângulo escaleno válido");
+                escreva("Triangulo escaleno valido");
             fimse
         fimse
     senao
-        escreva("Medidas inválidas");
+        escreva("Medidas invalidas");
     fimse
 senao
-    escreva("Erro: valores negativos ou zero não são permitidos");
+    escreva("Erro: valores negativos ou zero nao sao permitidos");
 fimse
