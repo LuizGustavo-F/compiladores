@@ -1,8 +1,5 @@
-WRITE "Entre com um valor para A"
 READ a
-WRITE "Entre com um valor para B"
 READ b
-WRITE "Entre com um valor para C"
 READ c
 _t0 = a > 0
 _t1 = b > 0

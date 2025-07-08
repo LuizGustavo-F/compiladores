@@ -2,11 +2,8 @@ inteiro a;
 inteiro b;
 inteiro c;
 
-escreva("Entre com um valor para A");
 leia(a);
-escreva("Entre com um valor para B");
 leia(b);
-escreva("Entre com um valor para C");
 leia(c);
 
 se (a > 0 && b > 0 && c > 0) entao

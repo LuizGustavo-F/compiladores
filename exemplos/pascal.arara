@@ -1,26 +1,28 @@
+inteiro n;
+inteiro linha;
+inteiro i;
+inteiro C;
+inteiro j; 
+
 leia(n);
 
-se (n >= 1) entao
-    leia(linha);
-    leia(i);
-    linha <- 1;
-
-    enquanto (linha <= n) faca
-        escreva(1);
-
-        i <- 1;
-        enquanto (i < linha) faca
-            se (i == 1) entao
-                escreva(1);
-            senao
-                escreva(linha * (linha - 1) / i);
-            fimse
-            i <- i + 1;
-        fimenquanto
-
-        escreva("\n");
-        linha <- linha + 1;
+linha <- 0;
+enquanto (linha < n) faca
+    
+    j <- 0;
+    enquanto (j < n - linha - 1) faca
+        escreva(" ");
+        j <- j + 1;
     fimenquanto
-senao
-    escreva("Erro: O número deve ser maior ou igual a 1.");
-fimse
+ 
+    C <- 1; 
+    i <- 0;
+    enquanto (i <= linha) faca
+        escreva(C); 
+        C <- C * (linha - i) / (i + 1); 
+        i <- i + 1;
+    fimenquanto
+    
+    escreva("\n");
+    linha <- linha + 1;
+fimenquanto
