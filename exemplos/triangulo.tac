@@ -1,5 +1,8 @@
+WRITE "Digite o valor de A: "
 READ a
+WRITE "Digite o valor de B: "
 READ b
+WRITE "Digite o valor de C: "
 READ c
 _t0 = a > 0
 _t1 = b > 0

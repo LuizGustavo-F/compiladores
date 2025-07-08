@@ -4,9 +4,9 @@ target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16
 target triple = "x86_64-pc-linux-gnu"
 
 @.str.0 = private unnamed_addr constant [3 x i8] c"\25\64\00", align 1
-@.str.1 = private unnamed_addr constant [4 x i8] c"\25\64\0A\00", align 1
-@.str.2 = private unnamed_addr constant [25 x i8] c"\44\69\67\69\74\65\20\75\6D\20\76\61\6C\6F\72\20\70\61\72\61\20\61\3A\0A\00", align 1
-@.str.3 = private unnamed_addr constant [25 x i8] c"\44\69\67\69\74\65\20\75\6D\20\76\61\6C\6F\72\20\70\61\72\61\20\62\3A\0A\00", align 1
+@.str.1 = private unnamed_addr constant [4 x i8] c"\25\64\20\00", align 1
+@.str.2 = private unnamed_addr constant [24 x i8] c"\44\69\67\69\74\65\20\75\6D\20\76\61\6C\6F\72\20\70\61\72\61\20\61\3A\00", align 1
+@.str.3 = private unnamed_addr constant [24 x i8] c"\44\69\67\69\74\65\20\75\6D\20\76\61\6C\6F\72\20\70\61\72\61\20\62\3A\00", align 1
 
 declare i32 @printf(i8*, ...)
 declare i32 @scanf(i8*, ...)
@@ -18,11 +18,11 @@ entry:
     %valor_ptr = alloca i32, align 4
     br label %start_code
 start_code:
-    %t0 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.2, i64 0, i64 0
+    %t0 = getelementptr inbounds [24 x i8], [24 x i8]* @.str.2, i64 0, i64 0
     %t1 = call i32 (i8*, ...) @printf(i8* %t0)
     %t2 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.0, i64 0, i64 0
     %t3 = call i32 (i8*, ...) @scanf(i8* %t2, i32* %a_ptr)
-    %t4 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.3, i64 0, i64 0
+    %t4 = getelementptr inbounds [24 x i8], [24 x i8]* @.str.3, i64 0, i64 0
     %t5 = call i32 (i8*, ...) @printf(i8* %t4)
     %t6 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.0, i64 0, i64 0
     %t7 = call i32 (i8*, ...) @scanf(i8* %t6, i32* %b_ptr)

@@ -2,8 +2,11 @@ inteiro a;
 inteiro b;
 inteiro c;
 
+escreva("Digite o valor de A: ");
 leia(a);
+escreva("Digite o valor de B: ");
 leia(b);
+escreva("Digite o valor de C: ");
 leia(c);
 
 se (a > 0 && b > 0 && c > 0) entao
