@@ -21,7 +21,7 @@ class LLVMGenerator:
             'declare i32 @printf(i8*, ...)', # Declaração da função printf
             'declare i32 @scanf(i8*, ...)' # Declaração da função scanf
         ]
-        
+
         # Lista para armazenar os blocos básicos da função main
         self.main_function_blocks = [] 
 
@@ -34,39 +34,40 @@ class LLVMGenerator:
 
         # Contador para gerar nomes únicos de registradores temporários LLVM (ex: %temp0, %temp1)
         self.llvm_temp_counter = 0 
+
         # Contador para gerar nomes únicos para strings globais (@.str.0, @.str.1)
         self.string_count = 0
+
         # Contador para gerar nomes únicos para rótulos de blocos (ex: b0, b1)
         self.label_count = 0
 
         # Lista de instruções para o bloco básico atualmente em construção
         self.current_block_instructions = [] 
+
         # Nome do bloco básico atual que está sendo construído
         self.current_block_name = "entry" 
 
         # Dicionário para armazenar strings literais que já foram processadas, evitando duplicação
         self.string_literals = {} 
+
         # Tabela de símbolos semântica, passada do analisador semântico para inferência de tipos
         self.semantic_table = semantic_table 
 
-    # Adiciona uma instrução à lista de instruções do bloco atual
+    # Adiciona uma instrução LLVM ao bloco atual.
     def _add_instruction(self, instruction_line):
         self.current_block_instructions.append(f'  {instruction_line}')
 
-    # Finaliza o bloco atual e inicia um novo
     def _start_new_block(self, block_name):
-        # Se houver instruções no bloco atual, finaliza-o e o adiciona à lista principal de blocos
         if self.current_block_instructions: 
-            # Garante que o bloco anterior termina com um branch/ret se não houver
             if not self.current_block_instructions[-1].strip().startswith(('br ', 'ret ')):
-                 self._add_instruction(f'br label %{block_name}') # Adiciona um salto para o próximo bloco
+                 self._add_instruction(f'br label %{block_name}')
 
-            self.main_function_blocks.append(f'{self.current_block_name}:') # Adiciona o rótulo do bloco anterior
-            self.main_function_blocks.extend(self.current_block_instructions) # Adiciona as instruções do bloco anterior
+            self.main_function_blocks.append(f'{self.current_block_name}:')
+            self.main_function_blocks.extend(self.current_block_instructions) 
             
-        self.current_block_name = block_name # Define o nome do novo bloco
-        self.current_block_instructions = [] # Zera a lista de instruções para o novo bloco
-        self.main_function_blocks.append(f'{block_name}:') # Adiciona o rótulo do novo bloco à lista principal
+        self.current_block_name = block_name
+        self.current_block_instructions = []
+        self.main_function_blocks.append(f'{block_name}:')
 
     # Retorna o tipo LLVM IR correspondente ao tipo Arara
     def _get_llvm_type(self, arara_type):
@@ -78,78 +79,65 @@ class LLVMGenerator:
 
     # Adiciona uma string literal como uma constante global LLVM IR
     def _add_string_literal(self, s_content):
-        # Verifica se a string já foi adicionada para evitar duplicações
         if s_content not in self.string_literals:
-            # Codifica a string para bytes UTF-8 e adiciona o byte nulo final (terminador)
             raw_bytes = s_content.encode('utf-8') + b'\x00'
-            # Converte cada byte para sua representação hexadecimal para LLVM IR (ex: 'A' -> '\41')
             llvm_escaped_bytes = "".join(f"\\{b:02X}" for b in raw_bytes)
-            # Calcula o comprimento em bytes da string (incluindo o terminador nulo)
             byte_array_len = len(raw_bytes) 
             
-            # Gera um nome único para a constante de string global (ex: @.str.0)
             name = f"@.str.{self.string_count}"
             self.string_count += 1
-            # Formata a instrução LLVM IR para definir a constante de string
             llvm_string = f'{name} = private unnamed_addr constant [{byte_array_len} x i8] c"{llvm_escaped_bytes}", align 1'
             
-            # Adiciona a definição da string à lista de definições globais
             self.global_strings_defs.append(llvm_string)
-            # Armazena o mapeamento da string original para seu nome LLVM IR e comprimento
             self.string_literals[s_content] = (name, byte_array_len)
         return self.string_literals[s_content] # Retorna (nome, comprimento) da string processada
 
-    # Gera um novo nome de registrador temporário LLVM único (ex: %temp0, %temp1)
+    # Gera nomes únicos para registradores LLVM (ex: %temp0).
     def next_llvm_reg(self):
         self.llvm_temp_counter += 1
         return f'%temp{self.llvm_temp_counter - 1}'
 
-    # Gera um novo nome de rótulo de bloco LLVM único (ex: block_0, block_1)
+    # Gera nomes únicos para blocos LLVM (ex: block_0).
     def next_llvm_label_name(self):
-        return f'block_{self.llvm_temp_counter}' # Usa o mesmo contador para garantir nomes únicos
+        return f'block_{self.llvm_temp_counter}'
 
-    # Obtém o valor de um operando TAC (TACOperand) e o traduz para um registrador/literal LLVM IR
+    # Traduz um operando TAC (literal, variável, temporário, rótulo) para um valor LLVM (registrador, literal, ou nome de rótulo).
     def _get_llvm_operand_value(self, tac_operand: 'TACOperand', target_llvm_type=None):
         val = tac_operand.value # O valor real do operando (ex: "a", 10, "_t0", "L1")
 
         if tac_operand.type == 'LITERAL':
-            # Se for um literal numérico (inteiro)
+            # Se for um literal numérico
             if isinstance(val, int) or str(val).isdigit(): 
-                # Converte para booleano (i1) se o tipo alvo for i1
                 if target_llvm_type == "i1":
                     return "true" if int(val) != 0 else "false" 
-                return str(val) # Retorna o valor numérico como string
-            # Se for um literal de string (ex: "Hello")
+                return str(val)
+            
+            # Se for um literal de string
             elif isinstance(val, str) and val.startswith('"'): 
-                stripped_val = val.strip('"') # Remove as aspas da string
-                name, length = self._add_string_literal(stripped_val) # Adiciona a string como global
-                string_ptr_reg = self.next_llvm_reg() # Gera um registrador para o ponteiro da string
-                # Gera instrução GEP para obter um ponteiro para o início da string global
+                stripped_val = val.strip('"') 
+                name, length = self._add_string_literal(stripped_val)
+                string_ptr_reg = self.next_llvm_reg()
                 self._add_instruction(f'  {string_ptr_reg} = getelementptr inbounds i8, [{length} x i8]* {name}, i64 0, i64 0')
-                return string_ptr_reg # Retorna o registrador do ponteiro da string
+                return string_ptr_reg
 
-        # Se for um identificador (variável de programa)
+        # Se for um identificador
         elif tac_operand.type == 'ID': 
-            var_name = val # O nome da variável
-            # Pega o ponteiro e o tipo real da variável do mapeamento
+            var_name = val
             ptr_reg, actual_llvm_type = self.var_map[var_name] 
-            load_reg = self.next_llvm_reg() # Gera um registrador para carregar o valor
-            # Carrega o valor da memória para o registrador
+            load_reg = self.next_llvm_reg()
             self._add_instruction(f'  {load_reg} = load {actual_llvm_type}, {actual_llvm_type}* {ptr_reg}, align 4')
             
-            # Se o tipo carregado for i32 e o tipo alvo for i1 (booleano), converte
             if actual_llvm_type != target_llvm_type and target_llvm_type is not None:
                 if actual_llvm_type == "i32" and target_llvm_type == "i1":
                     bool_reg = self.next_llvm_reg()
-                    self._add_instruction(f'  {bool_reg} = icmp ne i32 {load_reg}, 0') # Compara != 0 para obter booleano
+                    self._add_instruction(f'  {bool_reg} = icmp ne i32 {load_reg}, 0')
                     return bool_reg
-            return load_reg # Retorna o registrador que contém o valor carregado
-
+            return load_reg
+        
         # Se for um temporário TAC (ex: _t0)
         elif tac_operand.type == 'TEMP': 
-            temp_name = val # O nome do temporário
-            # Pega o registrador LLVM e o tipo real do temporário do mapeamento
-            val_reg, actual_llvm_type = self.temp_map.get(temp_name, (f"%{temp_name}", "i32")) # Default para i32 se não mapeado
+            temp_name = val
+            val_reg, actual_llvm_type = self.temp_map.get(temp_name, (f"%{temp_name}", "i32"))
             
             # Conversão de tipo se necessário (i32 para i1)
             if actual_llvm_type != target_llvm_type and target_llvm_type is not None:
@@ -157,14 +145,14 @@ class LLVMGenerator:
                     bool_reg = self.next_llvm_reg()
                     self._add_instruction(f'  {bool_reg} = icmp ne i32 {val_reg}, 0')
                     return bool_reg
-            return val_reg # Retorna o registrador que contém o valor do temporário
+            return val_reg
         
         # Se for um rótulo (Label)
         elif tac_operand.type == 'LABEL': 
-            return tac_operand.value # Retorna o nome do rótulo
+            return tac_operand.value
 
-        return "ERROR_OPERAND" # Retorna uma string de erro para operandos não reconhecidos
-
+        return "ERROR_OPERAND"
+    
     # Método principal para gerar o código LLVM IR a partir das instruções TAC
     def generate(self, tac_instructions: list['TACInstruction']): 
         # Reinicializa o estado do gerador para cada nova chamada, mantendo a tabela de símbolos
@@ -320,10 +308,8 @@ class LLVMGenerator:
                     self._add_instruction(f'  {fmt_ptr_reg} = getelementptr inbounds i8, [{format_str_len} x i8]* {format_str_name}, i64 0, i64 0') 
                     self._add_instruction(f'  %call_printf_{self.next_llvm_reg()} = call i32 (i8*, ...) @printf(i8* {fmt_ptr_reg}, i32 {llvm_value})')
 
-            # TRADUÇÃO DE CONTROLE DE FLUXO (IGNORADO NO MODO SIMPLIFICADO)
+            # TRADUÇÃO DE CONTROLE DE FLUXO
             elif op == "LABEL" or op == "GOTO" or op == "IF_FALSE_GOTO" or op in ["EQ", "NEQ", "LT", "LE", "GT", "GE", "AND", "OR", "NOT"] :
-                # Estas operações foram solicitadas para serem ignoradas neste modo simplificado.
-                # Não geramos código LLVM IR para elas.
                 pass
             # TRADUÇÃO DE DECL (IGNORADO NO MODO SIMPLIFICADO, TRATADO NA ALOCAÇÃO INICIAL)
             elif op == "DECL": 
@@ -341,11 +327,9 @@ class LLVMGenerator:
             self._add_instruction('  ret i32 0')
 
         # Finaliza o bloco atual e adiciona à lista de blocos da função main
-        # O self._start_new_block já gerencia a adição de blocos e seus rótulos
         self.main_function_blocks.append(f'{self.current_block_name}:')
         self.main_function_blocks.extend(self.current_block_instructions)
-
-        self.main_function_blocks.append('}') # Adiciona a chave de fechamento da função main
+        self.main_function_blocks.append('}')
 
         # --- FASE DE MONTAGEM FINAL DO CÓDIGO LLVM IR ---
         final_llvm_output = []

@@ -113,14 +113,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_programa; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterPrograma(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitPrograma(this);
-		}
 	}
 
 	public final ProgramaContext programa() throws RecognitionException {
@@ -177,14 +169,6 @@ public class AraraParser extends Parser {
 			return getRuleContext(CondicionalContext.class,0);
 		}
 		public ComandoCondicionalContext(ComandoContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComandoCondicional(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComandoCondicional(this);
-		}
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class ComandoDeclaracaoContext extends ComandoContext {
@@ -192,14 +176,6 @@ public class AraraParser extends Parser {
 			return getRuleContext(DeclaracaoContext.class,0);
 		}
 		public ComandoDeclaracaoContext(ComandoContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComandoDeclaracao(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComandoDeclaracao(this);
-		}
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class ComandoRepeticaoContext extends ComandoContext {
@@ -207,14 +183,6 @@ public class AraraParser extends Parser {
 			return getRuleContext(RepeticaoContext.class,0);
 		}
 		public ComandoRepeticaoContext(ComandoContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComandoRepeticao(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComandoRepeticao(this);
-		}
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class ComandoLeiaContext extends ComandoContext {
@@ -224,14 +192,6 @@ public class AraraParser extends Parser {
 		public TerminalNode RPAREN() { return getToken(AraraParser.RPAREN, 0); }
 		public TerminalNode SEMICOLON() { return getToken(AraraParser.SEMICOLON, 0); }
 		public ComandoLeiaContext(ComandoContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComandoLeia(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComandoLeia(this);
-		}
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class ComandoEscrevaContext extends ComandoContext {
@@ -243,14 +203,6 @@ public class AraraParser extends Parser {
 		public TerminalNode RPAREN() { return getToken(AraraParser.RPAREN, 0); }
 		public TerminalNode SEMICOLON() { return getToken(AraraParser.SEMICOLON, 0); }
 		public ComandoEscrevaContext(ComandoContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComandoEscreva(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComandoEscreva(this);
-		}
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class ComandoAtribContext extends ComandoContext {
@@ -261,14 +213,6 @@ public class AraraParser extends Parser {
 		}
 		public TerminalNode SEMICOLON() { return getToken(AraraParser.SEMICOLON, 0); }
 		public ComandoAtribContext(ComandoContext ctx) { copyFrom(ctx); }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComandoAtrib(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComandoAtrib(this);
-		}
 	}
 
 	public final ComandoContext comando() throws RecognitionException {
@@ -381,14 +325,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_condicional; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterCondicional(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitCondicional(this);
-		}
 	}
 
 	public final CondicionalContext condicional() throws RecognitionException {
@@ -432,14 +368,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_cond_opc; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterCond_opc(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitCond_opc(this);
-		}
 	}
 
 	public final Cond_opcContext cond_opc() throws RecognitionException {
@@ -493,14 +421,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_repeticao; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterRepeticao(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitRepeticao(this);
-		}
 	}
 
 	public final RepeticaoContext repeticao() throws RecognitionException {
@@ -541,14 +461,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declaracao; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterDeclaracao(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitDeclaracao(this);
-		}
 	}
 
 	public final DeclaracaoContext declaracao() throws RecognitionException {
@@ -588,14 +500,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_bloco; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterBloco(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitBloco(this);
-		}
 	}
 
 	public final BlocoContext bloco() throws RecognitionException {
@@ -641,14 +545,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expressao; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterExpressao(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitExpressao(this);
-		}
 	}
 
 	public final ExpressaoContext expressao() throws RecognitionException {
@@ -684,14 +580,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_logica; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterLogica(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitLogica(this);
-		}
 	}
 
 	public final LogicaContext logica() throws RecognitionException {
@@ -730,14 +618,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_logica_suf; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterLogica_suf(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitLogica_suf(this);
-		}
 	}
 
 	public final Logica_sufContext logica_suf() throws RecognitionException {
@@ -793,14 +673,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comparacao; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComparacao(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComparacao(this);
-		}
 	}
 
 	public final ComparacaoContext comparacao() throws RecognitionException {
@@ -836,14 +708,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comparacao_suf; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterComparacao_suf(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitComparacao_suf(this);
-		}
 	}
 
 	public final Comparacao_sufContext comparacao_suf() throws RecognitionException {
@@ -898,14 +762,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_soma; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterSoma(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitSoma(this);
-		}
 	}
 
 	public final SomaContext soma() throws RecognitionException {
@@ -944,14 +800,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_soma_suf; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterSoma_suf(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitSoma_suf(this);
-		}
 	}
 
 	public final Soma_sufContext soma_suf() throws RecognitionException {
@@ -1009,14 +857,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_termo; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterTermo(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitTermo(this);
-		}
 	}
 
 	public final TermoContext termo() throws RecognitionException {
@@ -1055,14 +895,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_termo_suf; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterTermo_suf(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitTermo_suf(this);
-		}
 	}
 
 	public final Termo_sufContext termo_suf() throws RecognitionException {
@@ -1127,14 +959,6 @@ public class AraraParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fator; }
-		@Override
-		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).enterFator(this);
-		}
-		@Override
-		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof AraraListener ) ((AraraListener)listener).exitFator(this);
-		}
 	}
 
 	public final FatorContext fator() throws RecognitionException {

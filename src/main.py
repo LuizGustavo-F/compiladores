@@ -115,8 +115,8 @@ def analisar_arquivo(caminho, gerar_tac=False, gerar_llvm=False):
     if gerar_llvm and tac_code:
         print("Iniciando a geração de Código Final (LLVM IR)...")
         try:
-            # LINHA CORRIGIDA AQUI: Passa apenas semantico.tabela_simbolos para o construtor
-            llvm_generator = LLVMGenerator(semantico.tabela_simbolos) 
+            llvm_generator = LLVMGenerator(semantico.tabela_simbolos)
+            
             # Chama generate_llvm_ir com as instruções TAC
             llvm_ir_code = llvm_generator.generate(tac_generator.tac_instructions)
 
