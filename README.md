@@ -1,6 +1,8 @@
-# 🦜 ARARA — Compilador Acadêmico
+# 🦜 ARARA — Um Compilador Didático
 
-ARARA é uma linguagem de programação fictícia com comandos em **português**, inspirada na linguagem Tiny. Criada com fins didáticos, ela possui **sintaxe clara**, **tipagem simples** e **estrutura de controle completa**, sendo ideal para o estudo de compiladores.
+ARARA é uma linguagem de programação procedural e fictícia com comandos em **português**, inspirada na linguagem Tiny. Criada com fins didáticos para a disciplina de Compiladores, ela possui **sintaxe clara**, **tipagem estática simples** e **estruturas de controle completas**, sendo ideal para o estudo prático de todas as fases de um compilador moderno.
+
+Este projeto implementa um compilador completo que traduz código-fonte `.arara` para **LLVM IR**, que por sua vez é compilado para um **executável nativo**.
 
 ---
 
@@ -8,109 +10,38 @@ ARARA é uma linguagem de programação fictícia com comandos em **português**
 
 ✅ Implementar um compilador completo com:
 
-- Análise **léxica**
-- Análise **sintática**
-- Geração de **Árvore Sintática Abstrata (AST)**
-- Tratamento de **erros personalizados**
-- Uso de **ANTLR4** com gramática LL(1)
+-   Análise **Léxica** com ANTLR4
+-   Análise **Sintática** com geração de uma **Árvore Sintática Abstrata (AST)**
+-   Análise **Semântica** (verificação de tipos, declarações, etc.)
+-   Geração de **Código de Três Endereços (TAC)**
+-   Geração de **Código Final** em **LLVM Intermediate Representation (IR)**
+-   Tratamento de **erros personalizados** em múltiplas fases
 
 ---
 
 ## 🧠 Funcionalidades da Linguagem
 
-🔤 **Tipos primitivos:**  
-`int`, `string`
+🔤 **Tipos primitivos:**
+`inteiro`, `real`
 
-📥 **Entrada:**  
-`leia(x)`
+📥 **Entrada:**
+`leia(variavel)`
 
-📤 **Saída:**  
-`escreva(...)`
+📤 **Saída:**
+`escreva(expressao)`
 
-📝 **Atribuição:**  
+📝 **Atribuição:**
 `variavel <- expressao`
 
 🔁 **Controle de fluxo:**
 
 ```arara
-se ... entao ... senao ... fimse  
-enquanto ... faca ... fimenquanto
-```
-
-🧮 **Expressões:**
-
-- Aritméticas: `+`, `-`, `*`, `/`
-- Comparações: `==`, `!=`, `<`, `>`, `<=`, `>=`
-- Lógicas: `&&`, `||`, `!`
-- Suporte a parênteses e precedência correta
-- Avaliação encadeada de expressões (ex: `a + b * c <= d || e != f`)
-
----
-
-## 📐 Exemplo de Sintaxe
-
-```arara
-leia(x);
-se x > 0 entao
-    escreva("Positivo");
+se (condicao) entao
+    // bloco de código
 senao
-    escreva("Negativo ou zero");
+    // bloco opcional
 fimse
-```
 
----
-
-## 🗂 Estrutura do Projeto
-
-```
-arara/
-├── grammar/         → Arquivo Arara.g4 (gramática ANTLR)
-├── generated/       → Arquivos gerados pelo ANTLR
-├── exemplos/        → Códigos de exemplo (.arara)
-├── src/             → Código-fonte do compilador
-│   ├── main.py
-│   ├── error_handler.py
-│   ├── ast_generator.py
-│   └── visitor.py
-├── docs/            → AST visual (.dot e .png)
-├── analisador.log   → Log de execução (opcional)
-├── antlr-4.13.1-complete.jar
-└── README.md        → Este arquivo ✨
-```
-
----
-
-## ⚙️ Como Executar
-
-### 1. Gerar arquivos ANTLR:
-
-```bash
-java -jar antlr-4.13.1-complete.jar -Dlanguage=Python3 -o generated grammar/Arara.g4
-```
-
-### 2. Executar o compilador:
-
-```bash
-python src/main.py exemplos/<arquivo>.arara
-```
-
-### 3. Gerar imagem da AST:
-
-```bash
-dot -Tpng docs/ast.dot -o docs/ast.png
-```
-
----
-
-## 📌 Observações
-
-- Suporte completo à gramática recursiva com sufixos (`soma_suf`, `termo_suf`, etc)
-- Condicionais aninhadas com `senao` opcionais
-- Erros léxicos e sintáticos tratados com mensagens personalizadas
-
----
-
-## 👨‍🏫 Autor
-
-📚 Projeto da disciplina de **Compiladores (2025)**  
-🔗 [GitHub do projeto](https://github.com/pedrolucasS86/compiladores)
+enquanto (condicao) faca
+    // bloco de código
+fimenquanto
