@@ -1,3 +1,5 @@
+Markdown
+
 # 🦜 ARARA — Um Compilador Didático
 
 ARARA é uma linguagem de programação procedural e fictícia com comandos em **português**, inspirada na linguagem Tiny. Criada com fins didáticos para a disciplina de Compiladores, ela possui **sintaxe clara**, **tipagem estática simples** e **estruturas de controle completas**, sendo ideal para o estudo prático de todas as fases de um compilador moderno.
@@ -45,3 +47,97 @@ fimse
 enquanto (condicao) faca
     // bloco de código
 fimenquanto
+🧮 Expressões:
+
+Aritméticas: +, -, *, /
+
+Relacionais: ==, !=, <, >, <=, >=
+
+Lógicas: &&, ||, !
+
+Suporte a parênteses e precedência de operadores.
+
+📐 Exemplo de Sintaxe
+Snippet de código
+
+// Declara uma variável do tipo inteiro
+inteiro n;
+
+escreva("Digite um número: ");
+leia(n);
+
+se (n > 0) entao
+    escreva("O número é positivo.");
+senao
+    escreva("O número é negativo ou zero.");
+fimse
+🗂 Estrutura do Projeto
+arara-compiler/
+├── grammar/          → Arquivo Arara.g4 (gramática ANTLR)
+├── generated/        → Arquivos gerados pelo ANTLR
+├── exemplos/         → Códigos de exemplo (.arara) e executáveis (.exe)
+├── src/              → Código-fonte do compilador em Python
+│   ├── main.py
+│   ├── ast_generator.py
+│   ├── tac_generator.py
+│   ├── llvm_generator.py
+│   └── ... (outros módulos)
+├── docs/             → AST visual (.dot e .png)
+├── antlr-4.13.1-complete.jar
+└── README.md         → Este arquivo ✨
+⚙️ Pré-requisitos
+Antes de executar, certifique-se de que você tem o seguinte software instalado e configurado no seu PATH:
+
+Python 3.x
+
+Java Development Kit (JDK) (para executar o ANTLR)
+
+ANTLR v4.13.1 (antlr-4.13.1-complete.jar)
+
+LLVM e Clang: Essencial para compilar o código LLVM gerado. Baixe aqui.
+
+(Opcional) Graphviz: Para visualizar a Árvore Sintática Abstrata (dot command).
+
+⚠️ Nota para usuários do Windows: É altamente recomendável executar os comandos de compilação final (clang) no x64 Native Tools Command Prompt for VS, que já vem com o ambiente do compilador e do linker da Microsoft configurado corretamente.
+
+🚀 Fluxo de Compilação Completo
+Siga os passos abaixo para compilar e executar um programa escrito em Arara.
+
+Passo 0: Configuração Inicial (Apenas uma vez)
+Se a pasta generated ainda não existe, gere os arquivos do ANTLR a partir da gramática:
+
+Bash
+
+# Execute na raiz do projeto
+java -jar antlr-4.13.1-complete.jar -Dlanguage=Python3 -o generated grammar/Arara.g4
+Passo 1: Arara → LLVM IR (.ll)
+Use o script principal do compilador para traduzir seu código .arara para LLVM IR. Este comando executa todas as fases do seu compilador.
+
+Bash
+
+# Execute no terminal de sua preferência (ex: VS Code, PowerShell)
+python src/main.py exemplos/SEU_EXEMPLO.arara --gerar-tac --gerar-llvm
+Isso irá criar o arquivo exemplos/SEU_EXEMPLO.ll.
+
+Passo 2: LLVM IR → Executável (.exe)
+Agora, compile o arquivo .ll gerado para um executável nativo usando o clang.
+
+Lembrete: Para evitar erros de linker no Windows, use o x64 Native Tools Command Prompt for VS.
+
+PowerShell
+
+# Execute no x64 Native Tools Command Prompt
+clang exemplos\SEU_EXEMPLO.ll -o exemplos\SEU_EXEMPLO.exe -Wl,/DEFAULTLIB:legacy_stdio_definitions.lib
+Passo 3: Executar!
+Finalmente, execute seu programa recém-criado.
+
+PowerShell
+
+# (Opcional, para ver acentos corretamente no terminal)
+chcp 65001
+
+# Execute o programa
+.\exemplos\SEU_EXEMPLO.exe
+👨‍🏫 Autor
+📚 Projeto da disciplina de Compiladores (2025)
+🔗 Nome do Autor
