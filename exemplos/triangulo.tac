@@ -1,5 +1,8 @@
+WRITE "Entre com valor a"
 READ a
+WRITE "Entre com valor b"
 READ b
+WRITE "Enrte com valor c"
 READ c
 _t0 = a > 0
 _t1 = b > 0

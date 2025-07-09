@@ -3,9 +3,13 @@
 import json
 from src.tac.TACGenerator import TACOperand, TACInstruction 
 
+
 class LLVMGenerator:
     def __init__(self, semantic_table={}): 
-        self.module_header_lines = ['; ModuleID = "arara_program"', 'source_filename = "arara.arara"', 'target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"', 'target triple = "x86_64-pc-linux-gnu"']
+        self.module_header_lines = ['; ModuleID = "arara_program"',
+                                     'source_filename = "arara.arara"',
+                                     'target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"',
+                                     'target triple = "x86_64-pc-linux-gnu"']
         self.global_strings_defs = []
         self.function_declarations = ['declare i32 @printf(i8*, ...)', 'declare i32 @scanf(i8*, ...)']
         self.function_body = []
@@ -17,6 +21,7 @@ class LLVMGenerator:
         self.string_count = 0
         self.label_count = 0
 
+ 
     def next_llvm_reg(self):
         reg_name = f'%t{self.temp_count}'
         self.temp_count += 1
@@ -27,6 +32,7 @@ class LLVMGenerator:
         self.label_count += 1
         return label_name
 
+    #bloco que converte a String para seu valor hexadecimal
     def _add_string_literal(self, s_content):
         if s_content not in self.string_literals:
             name = f"@.str.{self.string_count}"
@@ -45,14 +51,8 @@ class LLVMGenerator:
         
         if val_type == 'LITERAL':
             if isinstance(val, str) and val.startswith('"'):
-                # Pega o conteúdo da string, ex: "\\n"
                 stripped_val = val.strip('"')
-                
-                # <--- CORREÇÃO PRINCIPAL AQUI ---
-                # Processa os caracteres de escape (ex: converte '\\n' para o caractere de quebra de linha)
                 unescaped_str = stripped_val.encode('latin1').decode('unicode_escape')
-                
-                # O resto da lógica usa a string já processada
                 name, array_type = self._add_string_literal(unescaped_str)
                 ptr_reg = self.next_llvm_reg()
                 self.function_body.append(f'    {ptr_reg} = getelementptr inbounds {array_type}, {array_type}* {name}, i64 0, i64 0')
@@ -73,6 +73,7 @@ class LLVMGenerator:
             
         return "ERROR_OPERAND"
 
+    #bloco principal, responsavel por executar a tradução feita (clang)
     def generate(self, tac_instructions: list['TACInstruction']):
         self.__init__(self.semantic_table)
 
@@ -110,7 +111,18 @@ class LLVMGenerator:
                 llvm_type = "i1" if op in ["AND", "OR"] else "i32"
                 val1 = self._get_llvm_operand_value(arg1, llvm_type)
                 val2 = self._get_llvm_operand_value(arg2, llvm_type)
-                op_map = {"ADD":"add", "SUB":"sub", "MUL":"mul", "DIV":"sdiv", "EQ":"icmp eq", "NEQ":"icmp ne", "LT":"icmp slt", "LE":"icmp sle", "GT":"icmp sgt", "GE":"icmp sge", "AND":"and", "OR":"or"}
+                op_map = {"ADD":"add",
+                          "SUB":"sub",
+                          "MUL":"mul",
+                          "DIV":"sdiv",
+                          "EQ":"icmp eq",
+                          "NEQ":"icmp ne",
+                          "LT":"icmp slt",
+                          "LE":"icmp sle",
+                          "GT":"icmp sgt",
+                          "GE":"icmp sge",
+                          "AND":"and",
+                           "OR":"or"}
                 op_str = op_map[op]
                 self.function_body.append(f'    {target_reg} = {op_str} {llvm_type} {val1}, {val2}')
                 self.temp_map[result.value] = (target_reg, "i1" if "icmp" in op_str or op in ["AND", "OR"] else "i32")

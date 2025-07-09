@@ -4,6 +4,7 @@ inteiro i;
 inteiro C;
 inteiro j; 
 
+escreva("Insira um valor para o triangulo de pascal");
 leia(n);
 
 linha <- 0;

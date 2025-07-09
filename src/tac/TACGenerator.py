@@ -4,9 +4,9 @@ from antlr4.tree.Tree import ParseTreeVisitor
 from grammar.generated.AraraParser import AraraParser
 
 class TACOperand:
-    """Representa um operando em uma instrução TAC."""
+
     def __init__(self, type, value):
-        self.type = type # Tipos: 'ID', 'TEMP', 'LITERAL', 'LABEL'
+        self.type = type 
         self.value = value
 
     def __str__(self):
@@ -25,12 +25,13 @@ class TACOperand:
         return self.type == 'LABEL'
 
 class TACInstruction:
-    """Representa uma instrução de Código de Três Endereços (TAC)."""
+
     def __init__(self, opcode, result=None, arg1=None, arg2=None):
-        self.opcode = opcode # Operador (ex: ASSIGN, ADD, SUB, IF_FALSE_GOTO, GOTO, LABEL, READ, WRITE)
-        self.result = result # Operando de destino (TACOperand)
-        self.arg1 = arg1     # Primeiro operando de argumento (TACOperand)
-        self.arg2 = arg2     # Segundo operando de argumento (TACOperand)
+        self.opcode = opcode 
+        self.result = result 
+        self.arg1 = arg1    
+        self.arg2 = arg2     
+   
 
     def __str__(self):
         if self.opcode == "LABEL":
@@ -69,13 +70,16 @@ class TACInstruction:
         if opcode == "OR": return "||"
         return ""
 
+    #Herda a AST, executa intruções com base nos nós
 class TACGenerator(ParseTreeVisitor):
     def __init__(self):
         self.tac_instructions = []
         self.temp_count = 0
         self.label_count = 0
-        self.scope_manager = {} # Para rastrear variáveis e seus tipos, se necessário para TAC específico de tipo
+        self.scope_manager = {} 
 
+    #Listando contadores e garantindo exclusividade em VAR temporaria e label com nome unico
+    #Retornando um TACOperand de nome unico
     def next_temp(self):
         self.temp_count += 1
         return TACOperand('TEMP', f'_t{self.temp_count-1}')
@@ -87,7 +91,7 @@ class TACGenerator(ParseTreeVisitor):
     def get_tac_code(self):
         return [str(instr) for instr in self.tac_instructions]
 
-    # Visitadores para comandos
+    #Visits que percorrem a AST e convertem a expressão do nó em uma instrução
     def visitPrograma(self, ctx: AraraParser.ProgramaContext):
         for comando in ctx.comando():
             self.visit(comando)
@@ -99,7 +103,6 @@ class TACGenerator(ParseTreeVisitor):
         return None
 
     def visitComandoEscreva(self, ctx: AraraParser.ComandoEscrevaContext):
-        # Visita a expressão para obter o operando do resultado
         expr_result_operand = self.visit(ctx.expressao())
         self.tac_instructions.append(TACInstruction('WRITE', expr_result_operand))
         return None
@@ -111,41 +114,38 @@ class TACGenerator(ParseTreeVisitor):
         return None
 
     def visitDeclaracao(self, ctx: AraraParser.DeclaracaoContext):
-        # A declaração de variáveis geralmente não gera TAC diretamente,
-        # mas pode ser usada para atualizar informações no gerenciador de escopo
-        # se o TAC precisar de informações de tipo para alocação.
-        # Por enquanto, não gera instrução TAC.
+        
         return None
     
     def visitCondicional(self, ctx: AraraParser.CondicionalContext):
-        # Gera rótulos para o salto condicional e o final da estrutura
+        
         label_else = self.next_label()
         label_fimse = self.next_label()
 
-        # Visita a expressão da condição
+      
         condition_operand = self.visit(ctx.expressao())
 
         # IF_FALSE_GOTO para o label_else se a condição for falsa
         self.tac_instructions.append(TACInstruction('IF_FALSE_GOTO', label_else, condition_operand))
 
         # Visita o bloco THEN
-        self.visit(ctx.bloco()) # Alterado de ctx.bloco(0) para ctx.bloco()
+        self.visit(ctx.bloco()) 
 
-        # Se houver um bloco SENAO, salta para o FIMSE após o THEN
+        # Se houver um bloco SENAO, salta para o FIMSE 
         if ctx.cond_opc().SENAO():
             self.tac_instructions.append(TACInstruction('GOTO', label_fimse))
 
         # Rótulo para o bloco ELSE (ou fim do IF se não houver ELSE)
         self.tac_instructions.append(TACInstruction('LABEL', label_else))
 
-        # Se houver um bloco SENAO, visita-o
         if ctx.cond_opc().SENAO():
-            self.visit(ctx.cond_opc().bloco()) # Alterado de ctx.bloco(1) para ctx.cond_opc().bloco()
+            self.visit(ctx.cond_opc().bloco()) 
 
         # Rótulo para o final da estrutura SE
         self.tac_instructions.append(TACInstruction('LABEL', label_fimse))
         return None
 
+#---------------------------------------------------------------------------------------------------------
     def visitRepeticao(self, ctx: AraraParser.RepeticaoContext):
         # Gera rótulos para o início do loop e o final do loop
         label_loop_start = self.next_label()
@@ -175,6 +175,7 @@ class TACGenerator(ParseTreeVisitor):
     def visitExpressao(self, ctx: AraraParser.ExpressaoContext):
         return self.visit(ctx.logica())
 
+    #bloco responsavel por constituir a logica 
     def visitLogica(self, ctx: AraraParser.LogicaContext):
         left_operand = self.visit(ctx.comparacao())
         if ctx.logica_suf() and ctx.logica_suf().OPLOG():
@@ -212,7 +213,8 @@ class TACGenerator(ParseTreeVisitor):
     def visitar_soma_suf(self, ctx: AraraParser.Soma_sufContext, current_operand: TACOperand):
         if ctx.getChildCount() == 0:
             return current_operand
-
+        
+    #Operadores de soma e subtração
         op = ctx.OPSUM().getText()
         next_operand = self.visit(ctx.termo())
         temp = self.next_temp()
@@ -220,7 +222,6 @@ class TACGenerator(ParseTreeVisitor):
             self.tac_instructions.append(TACInstruction('ADD', temp, current_operand, next_operand))
         elif op == '-':
             self.tac_instructions.append(TACInstruction('SUB', temp, current_operand, next_operand))
-        # Continua visitando o sufixo com o novo temporário como operando atual
         return self.visitar_soma_suf(ctx.soma_suf(), temp)
 
     def visitTermo(self, ctx: AraraParser.TermoContext):
@@ -231,6 +232,7 @@ class TACGenerator(ParseTreeVisitor):
         if ctx.getChildCount() == 0:
             return current_operand
 
+    #Operadores multiplicação e divisão
         op = ctx.OPMULT().getText()
         next_operand = self.visit(ctx.fator())
         temp = self.next_temp()

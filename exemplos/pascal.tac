@@ -1,3 +1,4 @@
+WRITE "Insira um valor para o triangulo de pascal"
 READ n
 linha = 0
 L0:
